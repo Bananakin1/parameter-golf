@@ -34,7 +34,7 @@
 set -e
 
 # Configuration
-SCRIPT_NAME="exp11_vrl_xsa11_noema.py"  # Our submission script
+SCRIPT_NAME="exp15_qkgain5_mlp4x.py"  # Our submission script
 POD_NAME="parameter-golf-submission"
 TEMPLATE_ID="y5cejece4j"
 TEMPLATE_REF="nl2r56th"
@@ -72,6 +72,9 @@ cd parameter-golf
 python3 data/cached_challenge_fineweb.py --variant sp1024
 echo "Data download complete. $(ls data/datasets/fineweb10B_sp1024/*.bin | wc -l) shards."
 
+# Install brotli for better compression
+pip install brotli sentencepiece
+
 # Verify GPU
 python3 -c "import torch; print(f'GPUs: {torch.cuda.device_count()}, Type: {torch.cuda.get_device_name(0)}')"
 
@@ -99,8 +102,11 @@ train() {
 cd /workspace/parameter-golf
 
 # Upload our submission script (do this from your local machine first):
-# scp experiments/r3/exp11_vrl_xsa11_noema.py root@POD_IP:/workspace/parameter-golf/train_submission.py
+# scp experiments/r3/exp15_qkgain5_mlp4x.py root@POD_IP:/workspace/parameter-golf/train_submission.py
 # OR paste it directly, OR git pull from your fork
+
+# Ensure deps
+pip install brotli sentencepiece 2>/dev/null
 
 # Verify setup
 echo "GPUs: $(python3 -c 'import torch; print(torch.cuda.device_count())')"
@@ -135,6 +141,8 @@ echo "=== RESULTS ==="
 grep "val_bpb" "run_${RUN_ID}.log" | grep "step:"
 echo ""
 grep "final_int6" "run_${RUN_ID}.log"
+echo ""
+grep "sliding_window" "run_${RUN_ID}.log"
 echo ""
 grep "Serialized" "run_${RUN_ID}.log"
 echo ""
